@@ -1,6 +1,10 @@
-from django.http import HttpResponse
+from django.shortcuts import render
+
+from .models import Question
 
 
 # Create your views here.
 def index(request):
-    return HttpResponse("Hello, pybo에 오신것을 환영합니다")
+    questions = Question.objects.order_by('-create_date')  # - 가 있으면 내림차순 desc, 없으면 오름차순 asc
+    context = {'questions': questions}
+    return render(request, 'pybo/questions.html', context)
