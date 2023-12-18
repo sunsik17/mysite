@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
+from .forms import QuestionForm
 from .models import Question
 
 
@@ -20,3 +21,8 @@ def answer_create(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     question.answer_set.create(content=request.POST.get('content'))
     return redirect('pybo:detail', question_id=question_id)
+
+
+def question_create(request):
+    form = QuestionForm()
+    return render(request, 'pybo/question_form.html', {'form': form})
