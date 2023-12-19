@@ -1,6 +1,7 @@
+from django.http import HttpResponseNotAllowed
 from django.shortcuts import render, get_object_or_404, redirect
 
-from .forms import QuestionForm
+from .forms import QuestionForm, AnswerForm
 from .models import Question
 
 
@@ -19,10 +20,28 @@ def detail(request, question_id):
 
 def answer_create(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    question.answer_set.create(content=request.POST.get('content'))
-    return redirect('pybo:detail', question_id=question_id)
+    if request.method == 'POST':
+        form = AnswerForm(request.POST)
+        if form.is_valid():
+            answer = form.save(commit=False)
+            answer.question = question
+            answer.save()
+            return redirect('pybo:detail', question_id=question_id)
+    else:
+        return HttpResponseNotAllowed('Only \'POST\' method possible')
+    context = {'question': question, 'form': form}
+    return render(request, 'pybo/question_detail.html', context)
 
 
 def question_create(request):
-    form = QuestionForm()
-    return render(request, 'pybo/question_form.html', {'form': form})
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.save()
+            return redirect('pybo:index')
+    else:
+        form = QuestionForm()
+
+    context = {'form': form}
+    return render(request, 'pybo/question_form.html', context)
