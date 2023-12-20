@@ -34,6 +34,7 @@ STATICFILES_DIRS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'common.apps.CommonConfig'
     'pybo.apps.PyboConfig',
     'django.contrib.admin',
     'django.contrib.auth',
