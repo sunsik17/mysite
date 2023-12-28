@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 
 from .forms import QuestionForm, AnswerForm
 from .models import Question
@@ -53,3 +54,23 @@ def question_create(request):
 
     context = {'form': form}
     return render(request, 'pybo/question_form.html', context)
+
+
+@login_required(login_url='common:login')
+def question_modify(reqeust, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    if reqeust.user != question.author:
+        messages.error(reqeust, '수정 권한이 없습니다.')
+        return redirect('pybo:detail', question_id=question.id)
+
+    if reqeust.method == 'POST':
+        form = QuestionForm(reqeust.POST, instance=question)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.save()
+            return redirect('pybo:detail', question_id=question.id)
+    else:
+        form = QuestionForm(instance=question)
+
+    context = {'form': form}
+    return render(reqeust, 'pybo/question_form.html', context)
